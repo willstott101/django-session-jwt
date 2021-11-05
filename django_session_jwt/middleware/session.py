@@ -124,7 +124,7 @@ def verify_jwt(blob):
     return fields
 
 
-def create_jwt(user, session_key, expires=None):
+def create_jwt(user, session_key, expires=None, extra_kwargs={}):
     """
     Create a JWT for the given user containing the configured fields.
     """
@@ -146,15 +146,15 @@ def create_jwt(user, session_key, expires=None):
             continue
 
     if CALLABLE:
-        fields.update(CALLABLE(user))
+        fields.update(CALLABLE(user=user, **extra_kwargs))
 
     return jwt.encode(fields, KEY, algorithm=ALGO)
 
 
-def convert_cookie(cookies, user):
+def convert_cookie(cookies, user, extra_kwargs={}):
     cookie = cookies[settings.SESSION_COOKIE_NAME]
     cookies[settings.SESSION_COOKIE_NAME] = create_jwt(
-        user, cookie.value, EXPIRES)
+        user, cookie.value, EXPIRES, extra_kwargs)
 
 
 class SessionMiddleware(BaseSessionMiddleware):
@@ -202,7 +202,10 @@ class SessionMiddleware(BaseSessionMiddleware):
             return response
 
         try:
-            convert_cookie(response.cookies, user)
+            convert_cookie(response.cookies, user, {
+                "request": request,
+                "response": response,
+            })
 
         except (KeyError, AttributeError):
             # No cookie, no problem...
