@@ -66,6 +66,9 @@ Then modify settings.py:
         'KEY': 'string value or path to PEM key file',
         # 'KEY': (private_key_or_path, public_key_or_path),
 
+        # HEADERS can be useful to specify things like "kid" in the JWT header
+        'HEADERS': {'header_key': 'header_val'}
+
         # The session field is used to store the session key within the JWT. The default
         # is 'sk' but it can be overridden.
         'SESSION_FIELD': 'sk',

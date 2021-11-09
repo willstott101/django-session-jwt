@@ -87,6 +87,7 @@ def _parse_callable(f):
 DJANGO_SESSION_JWT = getattr(settings, 'DJANGO_SESSION_JWT', {})
 SESSION_FIELD = DJANGO_SESSION_JWT.get('SESSION_FIELD', 'sk')
 KEY, PUBKEY, ALGO = _parse_key(DJANGO_SESSION_JWT.get('KEY', settings.SECRET_KEY))
+HEADERS = DJANGO_SESSION_JWT.get('HEADERS', {})
 FIELDS = _parse_fields(DJANGO_SESSION_JWT.get('FIELDS', []))
 CALLABLE = _parse_callable(DJANGO_SESSION_JWT.get('CALLABLE'))
 EXPIRES = DJANGO_SESSION_JWT.get('EXPIRES', None)
@@ -148,7 +149,7 @@ def create_jwt(user, session_key, expires=None, extra_kwargs={}):
     if CALLABLE:
         fields.update(CALLABLE(user=user, **extra_kwargs))
 
-    return jwt.encode(fields, KEY, algorithm=ALGO)
+    return jwt.encode(fields, KEY, algorithm=ALGO, headers=HEADERS)
 
 
 def convert_cookie(cookies, user, extra_kwargs={}):
